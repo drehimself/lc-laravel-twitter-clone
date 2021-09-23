@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Tweet;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,4 +37,18 @@ Route::post('/tweets', function (Request $request) {
         'user_id' => 1,
         'body' => $request->body,
     ]);
+});
+
+Route::get('/users/{user}', function (User $user) {
+    return $user->only(
+        'id',
+        'name',
+        'username',
+        'avatar',
+        'profile',
+        'location',
+        'link',
+        'linkText',
+        'created_at'
+    );
 });
