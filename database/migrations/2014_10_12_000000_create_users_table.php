@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('username')->unique();
-            $table->string('avatar');
+            $table->string('avatar')->default('https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp');
             $table->text('profile')->nullable();
             $table->string('location')->nullable();
             $table->string('link')->nullable();

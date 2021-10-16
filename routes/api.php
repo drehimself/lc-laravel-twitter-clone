@@ -87,3 +87,21 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
 
     return response()->json('Logged out', 200);
 });
+
+Route::post('/register', function (Request $request) {
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'username' => 'required|min:4|unique:users',
+        'password' => 'required|min:6|confirmed',
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'username' => $request->username,
+        'password' => Hash::make($request->password),
+    ]);
+
+    return response()->json($user, 201);
+});
