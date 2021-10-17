@@ -22,21 +22,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/tweets', function () {
+Route::get('/tweets_all', function () {
     return Tweet::with('user:id,name,username,avatar')->latest()->paginate(10);
+});
+
+Route::middleware('auth:sanctum')->get('/tweets', function () {
+    $followers = auth()->user()->follows->pluck('id');
+
+    return Tweet::with('user:id,name,username,avatar')->whereIn('user_id', $followers)->latest()->paginate(10);
 });
 
 Route::get('/tweets/{tweet}', function (Tweet $tweet) {
     return $tweet->load('user:id,name,username,avatar');
 });
 
-Route::post('/tweets', function (Request $request) {
+Route::middleware('auth:sanctum')->post('/tweets', function (Request $request) {
     $request->validate([
         'body' => 'required',
     ]);
 
     return Tweet::create([
-        'user_id' => 1,
+        'user_id' => auth()->id(),
         'body' => $request->body,
     ]);
 });
@@ -102,6 +108,8 @@ Route::post('/register', function (Request $request) {
         'username' => $request->username,
         'password' => Hash::make($request->password),
     ]);
+
+    $user->follows()->attach($user);
 
     return response()->json($user, 201);
 });
