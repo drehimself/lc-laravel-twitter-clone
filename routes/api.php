@@ -47,6 +47,12 @@ Route::middleware('auth:sanctum')->post('/tweets', function (Request $request) {
     ]);
 });
 
+Route::middleware('auth:sanctum')->delete('/tweets/{tweet}', function (Tweet $tweet) {
+    abort_if($tweet->user->id !== auth()->id(), 403);
+
+    return response()->json($tweet->delete(), 200);
+});
+
 Route::get('/users/{user}', function (User $user) {
     return $user->only(
         'id',
