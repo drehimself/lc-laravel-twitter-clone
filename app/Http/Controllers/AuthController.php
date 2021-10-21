@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tweet;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
-class TweetController extends Controller
+class AuthController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,12 +16,7 @@ class TweetController extends Controller
      */
     public function index()
     {
-        $followers = auth()->user()->follows->pluck('id');
-
-        return Tweet::with('user:id,name,username,avatar')
-            ->whereIn('user_id', $followers)
-            ->latest()
-            ->paginate(10);
+        //
     }
 
     /**
@@ -41,33 +38,45 @@ class TweetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'body' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
+            'device_name' => 'required',
         ]);
 
-        return Tweet::create([
-            'user_id' => auth()->id(),
-            'body' => $request->body,
-        ]);
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        $token = $user->createToken($request->device_name)->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user->only('id', 'name', 'username', 'email', 'avatar'),
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Tweet $tweet)
+    public function show($id)
     {
-        return $tweet->load('user:id,name,username,avatar');
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tweet $tweet)
+    public function edit($id)
     {
         //
     }
@@ -76,10 +85,10 @@ class TweetController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tweet $tweet)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -87,13 +96,12 @@ class TweetController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Tweet  $tweet
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tweet $tweet)
+    public function destroy()
     {
-        abort_if($tweet->user->id !== auth()->id(), 403);
+        auth()->user()->currentAccessToken()->delete();
 
-        return response()->json($tweet->delete(), 200);
+        return response()->json('Logged out', 200);
     }
 }

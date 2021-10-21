@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tweet;
 use Illuminate\Http\Request;
 
-class TweetController extends Controller
+class TweetAllController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,12 +14,7 @@ class TweetController extends Controller
      */
     public function index()
     {
-        $followers = auth()->user()->follows->pluck('id');
-
-        return Tweet::with('user:id,name,username,avatar')
-            ->whereIn('user_id', $followers)
-            ->latest()
-            ->paginate(10);
+        return Tweet::with('user:id,name,username,avatar')->latest()->paginate(10);
     }
 
     /**
@@ -40,34 +35,27 @@ class TweetController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'body' => 'required',
-        ]);
-
-        return Tweet::create([
-            'user_id' => auth()->id(),
-            'body' => $request->body,
-        ]);
+        //
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Tweet $tweet)
+    public function show($id)
     {
-        return $tweet->load('user:id,name,username,avatar');
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tweet $tweet)
+    public function edit($id)
     {
         //
     }
@@ -76,10 +64,10 @@ class TweetController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tweet $tweet)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -87,13 +75,11 @@ class TweetController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Tweet  $tweet
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tweet $tweet)
+    public function destroy($id)
     {
-        abort_if($tweet->user->id !== auth()->id(), 403);
-
-        return response()->json($tweet->delete(), 200);
+        //
     }
 }
