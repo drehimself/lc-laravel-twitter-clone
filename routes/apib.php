@@ -25,10 +25,6 @@ use Illuminate\Validation\ValidationException;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tweets', [TweetController::class, 'index'])->name('tweet.index');
     Route::get('/tweets_all', [TweetAllController::class, 'index'])->name('tweet.index.all');
